@@ -1,0 +1,33 @@
+{
+  "registrationFields": [
+    { "name": "fullname", "label": "Nom complet", "type": "text", "required": true },
+    { "name": "username", "label": "Identifiant (email ou pseudo)", "type": "text", "required": true },
+    { "name": "password", "label": "Mot de passe", "type": "password", "required": true }
+  ],
+  "forms": {
+    "taxe": [
+      { "name": "revenu", "label": "Revenu fiscal", "type": "number" },
+      { "name": "revenu_conjoint", "label": "Revenu fiscal conjoint", "type": "number" },
+      { "name": "nb_enfants", "label": "Nombre d'enfants", "type": "number" },
+      { "name": "nb_charge", "label": "Nombre de personnes à charge", "type": "number" }
+    ],
+    "tns": [
+      { "name": "revenu", "label": "Revenu", "type": "number" },
+      { "name": "charges", "label": "Charges", "type": "number" },
+      { "name": "foncier", "label": "Foncier", "type": "number" },
+      { "name": "madelin", "label": "Madelin", "type": "number" }
+    ],
+    "immo": [
+      { "name": "revenu", "label": "Revenu", "type": "number" },
+      { "name": "charges", "label": "Charges", "type": "number" },
+      { "name": "dispositif", "label": "Dispositif", "type": "text" },
+      { "name": "deficit", "label": "Déficit antérieur", "type": "number" }
+    ]
+  },
+  "fullPageColors": {
+    "background": "#ffffff",
+    "header": "#0d6efd",
+    "accent": "#2dbf73",
+    "text": "#0b2a2b"
+  }
+}

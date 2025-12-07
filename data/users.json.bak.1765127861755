@@ -1,0 +1,13 @@
+[
+  {
+    "username": "steven.malte@gmail.com",
+    "fullname": "Steven",
+    "password": "$2a$10$4niBz0Z4awP757nE8ZU0FevDM14BZH6Xk6woSM9y94NlQY5eav33."
+  },
+  {
+    "username": "steven.martinc33@gmail.com",
+    "fullname": "Admin",
+    "password": "$2a$10$EHGTPS63BkxdihgVH6OvluaCmOEaWjAZQz5BazR6Zdc7izuzodTVu",
+    "role": "admin"
+  }
+]

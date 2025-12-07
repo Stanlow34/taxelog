@@ -1,0 +1,29 @@
+{
+  "steven.malte@gmail.com": {
+    "2023": {
+      "revenu": "25000",
+      "revenu_conjoint": "12000",
+      "nb_enfants": "1",
+      "nb_charge": "2"
+    },
+    "2024": {
+      "revenu": "15000",
+      "revenu_conjoint": "2000",
+      "nb_enfants": "1",
+      "nb_charge": "2"
+    },
+    "2025": {
+      "revenu": "20000",
+      "revenu_conjoint": "2000",
+      "nb_enfants": "2",
+      "nb_charge": "1"
+    },
+    "2026": {
+      "revenu": "18000",
+      "revenu_conjoint": "21000",
+      "nb_enfants": "2",
+      "nb_charge": "1"
+    }
+  },
+  "steven.martinc33@gmail.com": {}
+}
