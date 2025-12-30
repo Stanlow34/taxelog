@@ -6,9 +6,9 @@ const mysql = require('mysql2/promise');
 
 const HOST = process.env.MYSQL_HOST || 'cgdllbb.cluster021.hosting.ovh.net';
 const PORT = process.env.MYSQL_PORT ? parseInt(process.env.MYSQL_PORT, 10) : 3306;
-const USER = process.env.MYSQL_USER || 'cgdllbb72';
+const USER = process.env.MYSQL_USER || 'cgdllbb13800';
 const PASSWORD = process.env.MYSQL_PASSWORD || 'Styven34170';
-const DATABASE = process.env.MYSQL_DATABASE || 'cgdllbb72';
+const DATABASE = process.env.MYSQL_DATABASE || 'cgdllbb13800';
 const SOCKET = process.env.MYSQL_SOCKET || ''; // ex: /var/run/mysqld/mysqld.sock
 const CONNECT_TIMEOUT = process.env.MYSQL_CONNECT_TIMEOUT ? parseInt(process.env.MYSQL_CONNECT_TIMEOUT,10) : 5000; // ms
 

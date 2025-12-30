@@ -25,5 +25,13 @@
       "nb_charge": "1"
     }
   },
-  "steven.martinc33@gmail.com": {}
+  "steven.martinc33@gmail.com": {},
+  "admin": {
+    "2025": {
+      "revenu": "10000",
+      "revenu_conjoint": "2000",
+      "nb_enfants": "22",
+      "nb_charge": ""
+    }
+  }
 }

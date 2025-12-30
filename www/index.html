@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Simulateur - Tableau de bord</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <h1 class="logo"><a href="#home">MonSimulateur</a></h1>
+      <nav class="main-nav">
+        <a href="#auth" id="nav-auth">Connexion / Inscription</a>
+        <a href="#about">À propos</a>
+        <a href="#home">Accueil</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <div class="user-actions" id="user-actions"></div>
+    </div>
+  </header>
+
+  <main id="app" class="container">
+    <!-- Views will be injected here -->
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        © <span id="copyright-year"></span> MonSimulateur
+      </div>
+      <div class="footer-links">
+        <a href="#mentions">Mentions légales</a> |
+        <a href="#cgv">Conditions générales de vente</a> |
+        <a href="#contact">Contact</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- AUTH -->
+  <template id="view-auth">
+    <section class="auth-view card">
+      <div class="auth-grid">
+        <div>
+          <h2>Connexion</h2>
+          <form id="login-form" class="form">
+            <div class="form-row">
+              <label>Identifiant (email ou pseudo)</label>
+              <input type="text" name="login" required />
+            </div>
+            <div class="form-row">
+              <label>Mot de passe</label>
+              <input type="password" name="password" required />
+            </div>
+            <div class="form-row form-actions">
+              <button type="submit" class="btn primary">Se connecter</button>
+            </div>
+          </form>
+        </div>
+        <div>
+          <h2>Inscription</h2>
+          <form id="register-form" class="form">
+            <div class="form-row">
+              <label>Nom complet</label>
+              <input type="text" name="fullname" required />
+            </div>
+            <div class="form-row">
+              <label>Identifiant (email ou pseudo)</label>
+              <input type="text" name="username" required />
+            </div>
+            <div class="form-row">
+              <label>Mot de passe</label>
+              <input type="password" name="password" required />
+            </div>
+            <div class="form-row form-actions">
+              <button type="submit" class="btn success">S'inscrire</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <!-- HOME -->
+  <template id="view-home">
+    <section class="home-view card">
+      <h2>Accueil</h2>
+      <p>Bienvenue sur MonSimulateur — un prototype permettant de gérer vos données fiscales, TNS et immobilier sur 4 années (N à N-3).</p>
+      <ul>
+        <li>Utilisez Connexion/Inscription pour ouvrir votre tableau de bord.</li>
+        <li>Les données sont stockées sur le serveur Node (data/*.json).</li>
+      </ul>
+
+      <!-- Optional admin button on home (controlled by JS) -->
+      <div style="margin-top:1rem;">
+        <a id="home-admin-btn" href="#admin" class="btn danger" style="display:none">Admin</a>
+      </div>
+    </section>
+  </template>
+
+  <!-- ABOUT -->
+  <template id="view-about">
+    <section class="about-view card">
+      <h2>À propos</h2>
+      <p>Prototype de démonstration. Interface simple pour saisir et comparer des données sur 4 années.</p>
+    </section>
+  </template>
+
+  <!-- CONTACT -->
+  <template id="view-contact">
+    <section class="contact-view card">
+      <h2>Contact</h2>
+      <p>Pour toute question : <a href="mailto:contact@monsimulateur.example">contact@monsimulateur.example</a></p>
+    </section>
+  </template>
+
+  <!-- MENTIONS -->
+  <template id="view-mentions">
+    <section class="mentions-view card">
+      <h2>Mentions légales</h2>
+      <p>Entreprise : Exemple SARL. Adresse fictive. Ceci est une page de mentions légales de démonstration.</p>
+    </section>
+  </template>
+
+  <!-- CGV -->
+  <template id="view-cgv">
+    <section class="cgv-view card">
+      <h2>Conditions générales de vente</h2>
+      <p>Conditions générales fictives pour la démonstration.</p>
+    </section>
+  </template>
+
+  <!-- DASHBOARD -->
+  <template id="view-dashboard">
+    <section class="dashboard-view">
+      <div class="dashboard-header card">
+        <div>
+          <h2 id="dashboard-title">Tableau de bord</h2>
+          <p id="welcome-line"></p>
+        </div>
+        <div class="dashboard-controls">
+          <button id="export-data" class="btn">Exporter les données (JSON)</button>
+          <label class="btn outline file-label">
+            Importer JSON
+            <input id="import-file" type="file" accept=".json,application/json" />
+          </label>
+
+          <button id="logout-btn" class="btn danger">Se déconnecter</button>
+        </div>
+      </div>
+
+      <div class="zones-grid">
+        <!-- Zone 1 : Impôt sur le revenu -->
+        <div class="zone card" id="zone-taxe">
+          <h3 class="zone-title">Impôt sur le revenu - <span class="zone-year-title" data-zone="taxe"></span></h3>
+          <div class="zone-body">
+            <div class="zone-form">
+              <form data-zone="taxe" class="data-form">
+                <div class="form-row">
+                  <label>Année</label>
+                  <select name="year" class="year-select"></select>
+                </div>
+                <h4>Données pour l'impôt</h4>
+                <div class="form-row"><label>Revenu fiscal</label><input type="number" name="revenu" step="0.01" /></div>
+                <div class="form-row"><label>Revenu fiscal conjoint</label><input type="number" name="revenu_conjoint" step="0.01" /></div>
+                <div class="form-row"><label>Nombre d'enfants</label><input type="number" name="nb_enfants" min="0" /></div>
+                <div class="form-row"><label>Nombre de personnes à charge</label><input type="number" name="nb_charge" min="0" /></div>
+                <div class="form-row actions-row">
+                  <div class="left-actions">
+                    <button type="button" class="btn small" data-action="add-year" data-zone="taxe">+ Année</button>
+                    <button type="button" class="btn small outline" data-action="delete-year" data-zone="taxe">Supprimer année</button>
+                    <a href="#full/taxe" class="btn outline small" data-zone="taxe">Page complète</a>
+                  </div>
+                  <div class="right-actions">
+                    <button type="submit" class="btn primary">Enregistrer</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="zone-recap" data-zone="taxe">
+              <h4>Récapitulatif visuel (N à N-3)</h4>
+              <div class="recap-table"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zone 2 : TNS - Charges sociales -->
+        <div class="zone card" id="zone-tns">
+          <h3 class="zone-title">TNS - Charges sociales - <span class="zone-year-title" data-zone="tns"></span></h3>
+          <div class="zone-body">
+            <div class="zone-form">
+              <form data-zone="tns" class="data-form">
+                <div class="form-row"><label>Année</label><select name="year" class="year-select"></select></div>
+                <h4>Données TNS</h4>
+                <div class="form-row"><label>Revenu</label><input type="number" name="revenu" step="0.01" /></div>
+                <div class="form-row"><label>Charges</label><input type="number" name="charges" step="0.01" /></div>
+                <div class="form-row"><label>Foncier</label><input type="number" name="foncier" step="0.01" /></div>
+                <div class="form-row"><label>Madelin</label><input type="number" name="madelin" step="0.01" /></div>
+                <div class="form-row actions-row">
+                  <div class="left-actions">
+                    <button type="button" class="btn small" data-action="add-year" data-zone="tns">+ Année</button>
+                    <button type="button" class="btn small outline" data-action="delete-year" data-zone="tns">Supprimer année</button>
+                    <a href="#full/tns" class="btn outline small" data-zone="tns">Page complète</a>
+                  </div>
+                  <div class="right-actions">
+                    <button type="submit" class="btn primary">Enregistrer</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="zone-recap" data-zone="tns">
+              <h4>Récapitulatif visuel (N à N-3)</h4>
+              <div class="recap-table"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zone 3 : Immobilier -->
+        <div class="zone card" id="zone-immo">
+          <h3 class="zone-title">Immobilier - <span class="zone-year-title" data-zone="immo"></span></h3>
+          <div class="zone-body">
+            <div class="zone-form">
+              <form data-zone="immo" class="data-form">
+                <div class="form-row"><label>Année</label><select name="year" class="year-select"></select></div>
+                <h4>Données Immobilier</h4>
+                <div class="form-row"><label>Revenu</label><input type="number" name="revenu" step="0.01" /></div>
+                <div class="form-row"><label>Charges</label><input type="number" name="charges" step="0.01" /></div>
+                <div class="form-row"><label>Dispositif</label><input type="text" name="dispositif" /></div>
+                <div class="form-row"><label>Déficit antérieur</label><input type="number" name="deficit" step="0.01" /></div>
+                <div class="form-row actions-row">
+                  <div class="left-actions">
+                    <button type="button" class="btn small" data-action="add-year" data-zone="immo">+ Année</button>
+                    <button type="button" class="btn small outline" data-action="delete-year" data-zone="immo">Supprimer année</button>
+                    <a href="#full/immo" class="btn outline small" data-zone="immo">Page complète</a>
+                  </div>
+                  <div class="right-actions">
+                    <button type="submit" class="btn primary">Enregistrer</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="zone-recap" data-zone="immo">
+              <h4>Récapitulatif visuel (N à N-3)</h4>
+              <div class="recap-table"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zone 4 : Liens -->
+        <div class="zone card" id="zone-links">
+          <h3 class="zone-title">Liens utiles</h3>
+          <div class="zone-body links-zone">
+            <ul>
+              <li><a href="#contact">Contact</a></li>
+              <li><a href="#mentions">Mentions légales</a></li>
+              <li><a href="#cgv">Conditions générales de vente</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="legal-footer card small">
+        <p>Informations légales : Prototype de démonstration — données sauvegardées sur le serveur.</p>
+      </div>
+    </section>
+  </template>
+
+  <!-- ADMIN (new page template) -->
+  <template id="view-admin">
+    <section class="admin-view card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h2>Administration</h2>
+        <div>
+          <a href="#dashboard" class="btn outline">Retour</a>
+        </div>
+      </div>
+
+      <p class="muted">Page accessible aux administrateurs : gestion des utilisateurs, configuration des formulaires, champs d'inscription et couleurs.</p>
+
+      <div class="card">
+        <h3>Utilisateurs</h3>
+        <div id="admin-users-list">Chargement …</div>
+      </div>
+
+      <div class="card">
+        <h3>Utilisateurs</h3>
+        <div id="admin-config-list">Chargement …</div>
+      </div>
+
+      <div class="card">
+        <h3>Configuration (JSON)</h3>
+        <textarea id="admin-config-editor" style="width:100%;height:220px;font-family:monospace"></textarea>
+        <div style="margin-top:8px">
+          <button id="admin-save-config" class="btn primary">Enregistrer la configuration</button>
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <!-- FULL PAGE TEMPLATE (single template used for any type) -->
+  <template id="view-full">
+    <section class="full-view card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h2 id="full-title">Données complètes</h2>
+        <div>
+          <a href="#dashboard" class="btn outline">Retour</a>
+          <button id="print-pdf" class="btn primary">Télécharger PDF (Impression)</button>
+        </div>
+      </div>
+      <p id="full-subtitle" style="color:var(--muted)"></p>
+
+      <div class="full-controls card" style="margin-top:1rem;">
+        <label style="margin-right:1rem">Choisir années (sélection multiple) :
+          <select id="years-select" multiple size="6" style="min-width:260px"></select>
+        </label>
+        <button id="refresh-full" class="btn">Actualiser</button>
+      </div>
+
+      <div id="full-table" class="card" style="margin-top:1rem;overflow:auto"></div>
+
+      <p style="margin-top:0.5rem;color:var(--muted)">Affichage : N+3 à N-3 (7 années). Utilisez le bouton Impression pour générer un PDF via la boîte d'impression du navigateur.</p>
+    </section>
+  </template>
+
+  <script src="app.js"></script>
+  <script src="/www/admin-config-table.js" defer></script>
+  <script>
+    // Utility: determine current user from sessionStorage and show/hide the admin button on the dashboard.
+    function isAdminUser() {
+      try {
+        const user = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+        return user && user.role === 'admin';
+      } catch(e) {
+        return false;
+      }
+    }
+
+    function updateDashboardAdminBtnVisibility() {
+      const btn = document.getElementById('dashboard-admin-btn');
+      if(!btn) return;
+      if(isAdminUser()) btn.style.display = 'inline-block';
+      else btn.style.display = 'none';
+    }
+
+    // Prevent non-admin access to #admin route client-side (server should also enforce)
+    function protectAdminRoute() {
+      const hash = location.hash.replace('#','');
+      if(hash === 'admin' && !isAdminUser()) {
+        alert('Accès refusé : vous devez être administrateur pour accéder à cette page.');
+        // redirect to dashboard
+        location.hash = 'dashboard';
+        return false;
+      }
+      return true;
+    }
+
+    // Call when DOM loaded and on navigation
+    document.addEventListener('DOMContentLoaded', () => {
+      updateDashboardAdminBtnVisibility();
+      // protect if coming directly to #admin
+      protectAdminRoute();
+    });
+    window.addEventListener('hashchange', () => {
+      updateDashboardAdminBtnVisibility();
+      protectAdminRoute();
+    });
+
+    // Also update button immediately after login if setSession exists
+    if(window.setSession && typeof window.setSession === 'function') {
+      const orig = window.setSession;
+      window.setSession = function(user, token) {
+        orig(user, token);
+        // small timeout to ensure UI re-render if needed
+        setTimeout(updateDashboardAdminBtnVisibility, 50);
+      };
+    }
+  </script>
+</body>
+</html>

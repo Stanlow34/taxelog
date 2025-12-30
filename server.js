@@ -13,10 +13,10 @@ const jwt = require('jsonwebtoken');
 const app = express();
 
 const DATA_DIR = path.join(__dirname, 'data');
-const PUBLIC_DIR = path.join(__dirname, 'public');
+const PUBLIC_DIR = path.join(__dirname, 'www');
 
 const FILES = {
-  users: 'users.json',
+  // Suppression : users: 'users.json',
   taxe: 'informationstaxe.json',
   tns: 'informationstns.json',
   immo: 'informationsimmo.json',
@@ -43,7 +43,7 @@ function ensureDataDirSync(){
   for(const fname of Object.values(FILES)){
     const p = path.join(DATA_DIR, fname);
     if(!fs.existsSync(p)){
-      const initial = (fname === FILES.users) ? [] : (fname === FILES.config ? {
+      const initial = (fname === FILES.config ? {
         registrationFields: [
           { name: "fullname", label: "Nom complet", type: "text", required: true },
           { name: "username", label: "Identifiant (email ou pseudo)", type: "text", required: true },
@@ -82,6 +82,125 @@ function ensureDataDirSync(){
   }
 }
 ensureDataDirSync();
+
+
+async function findUserByUsername(username){
+  if(!username) return null;
+  if(typeof db.getUserByUsername === 'function') return await db.getUserByUsername(username);
+  if(typeof db.findUser === 'function') return await db.findUser({ username });
+  if(typeof db.getUser === 'function') return await db.getUser(username);
+  if(typeof db.query === 'function'){
+    // Exemple pour mysql2/pool : db.query('SELECT * FROM users WHERE username = ?', [username])
+    const rows = await db.query('SELECT * FROM users WHERE username = ?', [username]);
+    return Array.isArray(rows) && rows.length ? rows[0] : null;
+  }
+  throw new Error('Module db: aucune méthode connue pour récupérer un utilisateur. Partagez ./db pour adapter.');
+}
+
+app.post('/api/login', async (req, res) => {
+  try {
+    const { username, password } = req.body || {};
+    if(!username || !password){
+      return res.status(400).json({ error: 'username et password requis' });
+    }
+
+    const user = await findUserByUsername(username);
+    if(!user){
+      return res.status(401).json({ error: 'Utilisateur introuvable ou mot de passe incorrect' });
+    }
+
+    // Supporte plusieurs noms de champ pour le hash stocké
+    const hashed = user.password || user.pass || user.password_hash;
+    if(!hashed){
+      console.warn('User trouvé mais aucun mot de passe stocké (champ absent)');
+      return res.status(500).json({ error: 'Configuration du compte invalide' });
+    }
+
+    const ok = await bcrypt.compare(password, hashed);
+    if(!ok) return res.status(401).json({ error: 'Utilisateur introuvable ou mot de passe incorrect' });
+
+    const payload = {
+      id: user.id || user.user_id || null,
+      username: user.username || username,
+      role: user.role || 'user'
+    };
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+
+    const publicUser = {
+      id: payload.id,
+      username: payload.username,
+      fullname: user.fullname || user.name || '',
+      role: payload.role
+    };
+
+    return res.json({ token, user: publicUser });
+  } catch (err) {
+    console.error('Erreur /api/login:', err && err.message ? err.message : err);
+    return res.status(500).json({ error: 'Erreur interne' });
+  }
+});
+
+function authenticateJWT(req, res, next){
+  const auth = req.get('Authorization') || req.get('authorization');
+  if(!auth || !auth.startsWith('Bearer ')) return res.status(401).json({ error: 'Token manquant' });
+  const token = auth.slice('Bearer '.length);
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    if(err) return res.status(401).json({ error: 'Token invalide' });
+    req.user = decoded;
+    next();
+  });
+}
+
+app.get('/api/profile', authenticateJWT, async (req, res) => {
+  try{
+    const uid = req.user && req.user.id;
+    let userData = null;
+    if(uid && typeof db.getUserById === 'function'){
+      userData = await db.getUserById(uid);
+    } else {
+      userData = await findUserByUsername(req.user.username);
+    }
+    if(!userData) return res.status(404).json({ error: 'Utilisateur introuvable' });
+    delete userData.password;
+    delete userData.password_hash;
+    return res.json({ user: userData });
+  } catch (e) {
+    console.error('Erreur /api/profile:', e);
+    return res.status(500).json({ error: 'Erreur interne' });
+  }
+});
+
+// Exemple : protéger une route admin
+app.post('/api/admin/action', authenticateJWT, async (req, res) => {
+  if(!req.user || req.user.role !== 'admin') return res.status(403).json({ error: 'Accès refusé' });
+  // action admin...
+  return res.json({ ok: true });
+});
+
+// Le reste des routes qui utilisaient users.json (création, listing, ...) doivent maintenant appeler les fonctions du module db.
+// Exemple de création d'utilisateur (inscription) utilisant db.createUser :
+app.post('/api/register', async (req, res) => {
+  try {
+    const { username, password, fullname } = req.body || {};
+    if(!username || !password) return res.status(400).json({ error: 'username et password requis' });
+    const hash = bcrypt.hashSync(password, 10);
+    if(typeof db.createUser !== 'function'){
+      return res.status(500).json({ error: 'La fonction createUser n\'est pas disponible dans ./db' });
+    }
+    const created = await db.createUser({ username, fullname, password: hash, role: 'user' });
+    return res.status(201).json({ ok: true, user: { username, fullname } });
+  } catch (err) {
+    console.error('Erreur /api/register:', err);
+    return res.status(500).json({ error: 'Erreur interne' });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server listening on ${PORT}`);
+});
+
+
 
 function readJSONFileSync(fname){
   const p = path.join(DATA_DIR, fname);

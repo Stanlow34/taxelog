@@ -3,12 +3,12 @@
 require('dotenv').config();
 const mysql = require('mysql2/promise');
 
-const HOST = process.env.MYSQL_HOST || 'cgdllbb.cluster021.hosting.ovh.net';
+const HOST = process.env.MYSQL_HOST || '127.0.0.1';
 const PORT = process.env.MYSQL_PORT ? parseInt(process.env.MYSQL_PORT,10) : 3306;
 const SOCKET = process.env.MYSQL_SOCKET || '';
-const USER = process.env.MYSQL_USER || 'cgdllbb72';
-const PASSWORD = process.env.MYSQL_PASSWORD || 'Styven34170';
-const DB = process.env.MYSQL_DATABASE || 'cgdllbb72';
+const USER = process.env.MYSQL_USER || 'root';
+const PASSWORD = process.env.MYSQL_PASSWORD || '';
+const DB = process.env.MYSQL_DATABASE || 'taxelog';
 
 async function tryTcp() {
   console.log('Trying TCP', HOST, PORT);
