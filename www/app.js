@@ -1,6 +1,41 @@
-// www/app.js - front-end with add/delete year, "full" page, print-as-PDF support and admin users list
+// public/app.js - front-end with add/delete year, "full" page, print-as-PDF support and admin users list
 const API_BASE = '/api';
+// app.js
+// Exemple minimal d'utilisation de db.js avec Express
+require('dotenv').config();
+const express = require('express');
+const { query } = require('./db');
 
+const app = express();
+app.use(express.json());
+
+// Exemple GET: récupérer utilisateurs (utiliser des prepared statements)
+app.get('/users', async (req, res) => {
+  try {
+    const rows = await query('SELECT id, name, email FROM users LIMIT ?', [50]);
+    res.json(rows);
+  } catch (err) {
+    console.error('DB error', err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+// Exemple POST: insertion sécurisée
+app.post('/users', async (req, res) => {
+  const { name, email } = req.body;
+  if (!name || !email) return res.status(400).json({ error: 'name et email requis' });
+
+  try {
+    const result = await query('INSERT INTO users (name, email) VALUES (?, ?)', [name, email]);
+    res.status(201).json({ id: result.insertId });
+  } catch (err) {
+    console.error('DB error', err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server listening on ${PORT}`));
 // --- helper fetch wrappers (robust) ---
 async function apiFetch(path, opts = {}) {
   const token = currentToken();
